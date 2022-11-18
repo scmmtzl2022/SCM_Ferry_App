@@ -5,10 +5,10 @@ buildscript {
         // ...
         RNMapboxMapsImpl = "mapbox" // required for v10
 
-        RNMapboxMapsLibs = { // optional - only required if you want to customize it
-            implementation 'com.mapbox.maps:android:10.6.0'
-            implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.4.1'
-        }
+        // RNMapboxMapsLibs = { // optional - only required if you want to customize it
+        //     implementation 'com.mapbox.maps:android:10.6.0'
+        //     implementation 'com.mapbox.mapboxsdk:mapbox-sdk-turf:5.4.1'
+        // }
         buildToolsVersion = "31.0.0"
         minSdkVersion = 21
         compileSdkVersion = 31
@@ -43,9 +43,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
-        maven { url "$rootDir/../node_modules/react-native/android" }
-        maven { url "https://jitpack.io" }
-        maven { url "https://maven.google.com" }
+        // maven { url "$rootDir/../node_modules/react-native/android" }
+        // maven { url "https://jitpack.io" }
+        // maven { url "https://maven.google.com" }
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url("$rootDir/../node_modules/react-native/android")
@@ -54,19 +54,7 @@ allprojects {
             // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")
         }
-        // maven {
-        //     url 'https://api.mapbox.com/downloads/v2/releases/maven'
-        //     authentication {
-        //         basic(BasicAuthentication)
-        //     }
-        //     credentials {
-        //         // Do not change the username below.
-        //         // This should always be `mapbox` (not your username).
-        //         username = 'mapbox'
-        //         // Use the secret token you stored in gradle.properties as the password
-        //         password = project.properties['pk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsOTgwYmptNDJqaG4zdnFtMGZkOWdueHQifQ.IN2f_fxmhMtT8RhqnOclrg'] ?: ""
-        //     }
-        // }
+   
         mavenCentral {
             // We don't want to fetch react-native from Maven Central as there are
             // older versions over there.
@@ -75,23 +63,22 @@ allprojects {
             }
         }
         google()
-        // maven { url 'https://www.jitpack.io' }
+        maven { url 'https://www.jitpack.io' }
         maven { url "https://jitpack.io" }
-        
-        //map box added
-         maven {
-            url 'https://api.mapbox.com/downloads/v2/releases/maven'
-            authentication {
-                basic(BasicAuthentication)
-            }
-            credentials {
-                // Do not change the username below.
-                // This should always be `mapbox` (not your username).
-                username ='scmferryversion3'
-                // Use the secret token you stored in gradle.properties as the password
-                // password ='sk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsYWpoNHhmcDBjdGkzb3FxMXg3NW1scm8ifQ.mPvOzzpq6zAuEvGbvRkkRw'
-                password = project.properties['MAPBOX_DOWNLOADS_TOKEN'] ?: ""
-            }
+
+        maven {
+          url 'https://api.mapbox.com/downloads/v2/releases/maven'
+          authentication {
+            basic(BasicAuthentication)
+          }
+          credentials {
+            // Do not change the username below.
+            // This should always be `mapbox` (not your username).
+            username = "mapbox"
+            // Use the secret token you stored in gradle.properties as the password
+            password = 'sk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsYW01eWl4ajA0cDQzcXBjazgyMGlkeHUifQ.r69_9La00wGMGqNnDHhzMA'
+          }
         }
+        
     }
 }

@@ -266,7 +266,8 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //added mapbox new library
-    // implementation project(':mapbox-react-native-mapbox-gl')
+    // implementation project(': com.mapbox.maps:android:10.9.0')
+    implementation 'com.mapbox.maps:android:10.9.1'
 
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules

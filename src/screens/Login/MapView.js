@@ -1,16 +1,18 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 // import MapboxGL from '@mapbox/react-native-mapbox-gl';
+import MapboxGL from '@rnmapbox/maps';
 
-
+MapboxGL.setAccessToken('pk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsOTgwYmptNDJqaG4zdnFtMGZkOWdueHQifQ.IN2f_fxmhMtT8RhqnOclrg');
 // MapboxGL.setAccessToken('pk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsOTgwYmptNDJqaG4zdnFtMGZkOWdueHQifQ.IN2f_fxmhMtT8RhqnOclrg');
 const MapView = () => {
     
         return (
           <View style={styles.page}>
             <View style={styles.container}>
+            <MapboxGL.MapView style={styles.map} />
               {/* <MapboxGL.MapView style={styles.map} /> */}
-              <Text>Map View</Text>
+              {/* <Text>Map View</Text> */}
             </View>
           </View>
         );
@@ -24,8 +26,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5FCFF'
   },
   container: {
-    height: 300,
-    width: 300,
+    height: '100%',
+    width: '100%',
     backgroundColor: 'tomato'
   },
   map: {
