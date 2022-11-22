@@ -1,10 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import React, {useEffect, useState} from 'react';
-import {BASE_URL} from "../../config"
-import { AuthContext} from "../context/Context";
+import React, { useEffect, useState } from 'react';
+import { BASE_URL } from "../../config"
+import { AuthContext } from "../context/Context";
 
-export const AuthProvider = ({children}) => {
+export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [splashLoading, setSplashLoading] = useState(false);
@@ -26,7 +26,6 @@ export const AuthProvider = ({children}) => {
       })
       .then(res => {
         let userInfo = res.data;
-        userInfo.driverLogin = false;
         setUserInfo(userInfo);
         AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
         setIsLoading(false);
@@ -35,30 +34,6 @@ export const AuthProvider = ({children}) => {
       .catch(e => {
         console.log('ferry login error');
         console.log(e);
-        setIsLoading(false);
-        return false;
-      });
-    return res;
-  };
-  /**
-   * Driver Login
-   */
-  const driverLogin = async (Id, password) => {
-    setIsLoading(true);
-    const res = await axios
-      .post(`${BASE_URL}/driverLogin`, {
-        driverId: Id,
-        password: password,
-      })
-      .then(res => {
-        let driverInfo = res.data;
-        driverInfo.driverLogin = true;
-        setUserInfo(driverInfo);
-        AsyncStorage.setItem('userInfo', JSON.stringify(driverInfo));
-        setIsLoading(false);
-        return true;
-      })
-      .catch(e => {
         setIsLoading(false);
         return false;
       });
@@ -94,9 +69,8 @@ export const AuthProvider = ({children}) => {
     setUserInfo({});
   };
 
-  useEffect(() => {  
+  useEffect(() => {
     isLoggedIn();
-    driverLogin();
   }, []);
 
   return (
@@ -106,7 +80,6 @@ export const AuthProvider = ({children}) => {
         userInfo,
         splashLoading,
         login,
-        driverLogin,
         logout,
       }}>
       {children}

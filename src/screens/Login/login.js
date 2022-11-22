@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   Text,
   TextInput,
@@ -7,29 +7,27 @@ import {
   View,
 } from 'react-native';
 
-import {Provider} from 'react-native-paper';
-import { Item } from 'react-native-paper/lib/typescript/components/List/List';
+import { Provider } from 'react-native-paper';
 import DropDown from '../../components/DropDown';
-import {AuthContext} from "../../hooks/context/Context";
-import { LoginStyle } from "./login.style";
+import { AuthContext } from "../../hooks/context/Context";
+import { CommonStyle} from "./common.style";
 
 let loginMsg = 'Login id is required.';
 let companyNameMsg = 'Company name is required.';
 let codeMsg = 'Password is required.';
-let codeMatchMsg = 'Password is not correct.';
-let company = [{id: 1, name: 'SCM'}, {id: 2, name: 'CGM'}]
-const UserLoginScreen = ({navigation}) => {
+let codeMatchMsg = 'Login ID or Password is not correct.';
+let company = [{ id: 1, name: 'SCM' }, { id: 2, name: 'CGM' }]
+const UserLoginScreen = () => {
   const [loginId, setloginId] = useState(null);
   const [loginIDErr, setloginIdErr] = useState(false);
   const [password, setPassword] = useState(null);
   const [passwordErr, setPasswordErr] = useState(false);
-  const {login} = useContext(AuthContext);
-  const [showcompanyname, setShowCompanyName] = useState(false);
+  const { login } = useContext(AuthContext);
   const [companyName, setcompanyName] = useState([]);
   const [companyNameErr, setcompanyNameErr] = useState(false);
   const [code, setcodeErr] = useState(false);
   const [codeMatchErr, setcodeNotEqualErr] = useState(false);
-  const Separator = () => <View style={LoginStyle.separator} />;
+  const Separator = () => <View style={CommonStyle.separator} />;
   const [selectedItem, setSelectedItem] = useState(null)
   const onSelect = (item) => {
     setcompanyName(item);
@@ -49,45 +47,47 @@ const UserLoginScreen = ({navigation}) => {
 
     if (loginId && password && companyName?.name) {
       const res = await onLoginUser();
-      if(res){
+      if (res) {
         setcodeNotEqualErr(false);
       }
       else {
         setcodeNotEqualErr(true);
       }
-      }
     }
+  }
 
   return (
     <Provider>
-      <View style={LoginStyle.container}>
-        <Text style={LoginStyle.titletxt}>Welcome</Text>
-        <View style={LoginStyle.wrapper}>
+      <View style={CommonStyle.container}>
+        <Text style={CommonStyle.titletxt}>Welcome</Text>
+        <View style={CommonStyle.wrapper}>
           <Image
             source={require('../../../assets/welcome.png')}
-            style={LoginStyle.image2}
+            style={CommonStyle.image2}
           />
+          <Separator />
+          {codeMatchErr ? (
+            <Text style={CommonStyle.errtxt}>{codeMatchMsg}</Text>
+          ) : null}  
+          <Separator />        
           <TextInput
-            style={LoginStyle.textboxInput}
+            style={CommonStyle.textboxInput}
             value={loginId}
             placeholder="Login ID"
             onChangeText={text => setloginId(text)}
           />
-          {loginIDErr ? <Text style={LoginStyle.errtxt}>{loginMsg}</Text> : null}
+          {loginIDErr ? <Text style={CommonStyle.errtxt}>{loginMsg}</Text> : null}
           <Separator />
           <TextInput
-            style={LoginStyle.textboxInput}
+            style={CommonStyle.textboxInput}
             value={password}
             placeholder="Enter password"
             onChangeText={text => setPassword(text)}
             secureTextEntry
           />
-          {passwordErr ? <Text style={LoginStyle.errtxt}>{codeMsg}</Text> : null}
-          {codeMatchErr ? (
-            <Text style={LoginStyle.errtxt}>{codeMatchMsg}</Text>
-          ) : null}
+          {passwordErr ? <Text style={CommonStyle.errtxt}>{codeMsg}</Text> : null}
           <Separator />
-          <View style={LoginStyle.safeContainerStyle}>
+          <View style={CommonStyle.safeContainerStyle}>
             <DropDown
               value={selectedItem}
               data={company}
@@ -95,7 +95,7 @@ const UserLoginScreen = ({navigation}) => {
             />
           </View>
           {companyNameErr ? (
-            <Text style={LoginStyle.errtxt}>{companyNameMsg}</Text>
+            <Text style={CommonStyle.errtxt}>{companyNameMsg}</Text>
           ) : null}
           <View
             style={{
@@ -103,13 +103,13 @@ const UserLoginScreen = ({navigation}) => {
             }}>
             <TouchableOpacity
               style={{
-                ...LoginStyle.button02,
+                ...CommonStyle.button02,
                 marginVertical: 10,
               }}
               onPress={() => {
                 onSubmitUser();
               }}>
-              <Text style={LoginStyle.buttonText}>Login</Text>
+              <Text style={CommonStyle.buttonText}>Login</Text>
             </TouchableOpacity>
           </View>
         </View>

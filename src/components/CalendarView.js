@@ -16,7 +16,7 @@ let datesWhitelist = [
 ];
 let datesBlacklist = [moment().add(7, 'days')];
 const CalendarView = ({ selectDate }) => {
-  const defaultSelectedDate = moment().add(0,'days');
+  const defaultSelectedDate = moment().add(0, 'days');
 
   return (
     <View>

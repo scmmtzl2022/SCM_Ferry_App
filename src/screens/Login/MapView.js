@@ -1,19 +1,23 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, SafeAreaView, View, Image, Text, TouchableOpacity, Alert } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import axios from 'axios';
 import qs from 'qs';
 import moment from 'moment';
 import { AuthContext } from "../../hooks/context/Context";
-import { LoginStyle } from "./login.style";
+import { CommonStyle } from "./common.style";
+import { accessToken } from "../../config";
+import GetLocation from 'react-native-get-location';
+import Geolocation from 'react-native-geolocation-service';
 
-MapboxGL.setAccessToken('pk.eyJ1IjoibWF5dGh1emFybGluIiwiYSI6ImNsOTgwYmptNDJqaG4zdnFtMGZkOWdueHQifQ.IN2f_fxmhMtT8RhqnOclrg');
+MapboxGL.setAccessToken(accessToken);
 const MapView = () => {
-  let [deslocation, setLocation] = useState(null);
-  let [responseToken, setResponseToken] = useState(null);
+  let [carLocation, setCarLocation] = useState(null);
+  let [userLocation, setUserLocation] = useState(null);
   let GMTstyle = moment().utc();
   let current = GMTstyle.format('YYYY-MM-DD hh:mm:ss');
   let _camera;
+  const USER_SHOW_LOCATION = true;
   const { logout } = useContext(AuthContext);
   /**
    * Get access token
@@ -30,7 +34,6 @@ const MapView = () => {
       'user_pwd_md5': '21218cca77804d2ba1922c33e0151105',
       'expires_in': 7200,
     };
-    console.log("data Get Access :", dataToken);
     const getOption = {
       method: 'POST',
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -40,13 +43,7 @@ const MapView = () => {
     console.log("response token!!");
 
     axios(getOption).then(res => {
-      console.log("Token response :", res);
-      console.log("Token response  res.data :", res.data.result.accessToken);
-      setResponseToken(res.data.result.accessToken);
-
-      console.log("current ", current);
-      console.log("responseToken ", responseToken);
-
+      console.log("Access Token :", res.data.result.accessToken);
       const data = {
         'method': 'jimi.device.location.get',
         'timestamp': current,
@@ -58,7 +55,7 @@ const MapView = () => {
         'imeis': 865784052487926,
         'map_type': 'GOOGLE',
       };
-      console.log("data :", data);
+      console.log("Location request params :", data);
       const options = {
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -70,15 +67,15 @@ const MapView = () => {
         axios(options).then(res => {
           console.log(res.data);
           console.log([res.data.result[0].lng, res.data.result[0].lat]);
-          setLocation([res.data.result[0].lng, res.data.result[0].lat]);
+          setCarLocation([res.data.result[0].lng, res.data.result[0].lat]);
         })
           .catch(err => {
-            console.log("Device location error :", err)
+            console.log("Location request from GPS device failed.", err)
           })
-      }, 5000);
+      }, 10000);
     })
       .catch(err => {
-        console.log("Request token request error :", err)
+        console.log("Token request failed!!!", err)
       })
 
   }
@@ -89,19 +86,25 @@ const MapView = () => {
   const centeringButtonPress = () => {
     _camera !== undefined &&
       _camera?.flyTo(
-        deslocation?.length > 0 ? deslocation : [96.14965243954374, 16.798741608382194],
+        carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194],
         1000,
       );
   };
-  
-  React.useEffect(() => {
-    // getAccessToken();
+
+  useEffect(() => {
+    getAccessToken();
+    async function getInitialLocation() {
+    requestGetLocation();
+    }
+    getInitialLocation()
     centeringButtonPress();
   }, []);
 
   const stopPress = () => {
     console.log("logout!!")
     logout();
+    setCarLocation(null);
+    setCarLocation(null);
   };
   const handleStop = async () => {
     return Alert.alert(
@@ -110,7 +113,7 @@ const MapView = () => {
       [
         {
           text: 'မထွက်ပါ',
-          onPress: () => {},
+          onPress: () => { },
         },
         {
           text: 'ထွက်မည်',
@@ -122,6 +125,95 @@ const MapView = () => {
     );
   };
 
+  /**
+   * on user location update.
+   * @param {*} newUserLocation
+   */
+   const onUserLocationUpdate = newUserLocation => {
+    setInterval(() => {
+    setUserLocation([
+      newUserLocation.coords.longitude,
+      newUserLocation.coords.latitude,
+    ]);
+  }, 60000);
+  };
+
+  /**
+   * request get locaiton.
+   * @returns
+   */
+   const requestGetLocation = async () => {
+    const response = await GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+    })
+      .then(async location => {
+        return location;
+      })
+      .catch(async ex => {
+        const {code, message} = ex;
+        console.warn(code, message);
+        if (code === 'CANCELLED') {
+          console.log('User ဘက်မှ Location ယူခြင်းကို Canceled လုပ်ထားပါသည်');
+        } else if (code === 'UNAVAILABLE') {
+          Alert.alert('သင်၏ဖုန်းမှ GPS ကို ဖွင့်ပေးပါ');
+        } else if (code === 'TIMEOUT') {
+          Alert.alert('Location ယူခြင်းအချိန် ကျော်လွန်သွားပါပြီ');
+        } else if (code === 'UNAUTHORIZED') {
+          Alert.alert('Location ယူရန်ခွင့်ပြုချက်မရှိပါ');
+        } else {
+          console.log('တခုခု မှားယွင်းနေပါသည်');
+        }
+        const data = await _requestLocation();
+        return data;
+      });
+    return response;
+  };
+
+  /**
+   * request location with Geolocation API.
+   * @returns
+   */
+   const _requestLocation = async () => {
+    const response = await new Promise(resolve => {
+      const config = {
+        enableHighAccuracy: true,
+        timeout: 100,
+        maximumAge: 800,
+      };
+      Geolocation.getCurrentPosition(
+        position => {
+        setInterval(() => {
+          setUserLocation([
+            position.coords.longitude,
+            position.coords.latitude,
+          ]);
+        }, 60000);  
+          resolve(position.coords);
+        },
+        error => {
+          // See error code charts below.
+          const {code, message} = error;
+          if (code === 'CANCELLED') {
+            console.log('User ဘက်မှ Location ယူခြင်းကို Canceled လုပ်ထားပါသည်');
+          } else if (code === 'UNAVAILABLE') {
+            Alert.alert('သင်၏ဖုန်းမှ GPS ကို ဖွင့်ပေးပါ');
+          } else if (code === 'TIMEOUT') {
+            Alert.alert('Location ယူခြင်းအချိန် ကျော်လွန်သွားပါပြီ');
+          } else if (code === 'UNAUTHORIZED') {
+            Alert.alert('Location ယူရန်ခွင့်ပြုချက်မရှိပါ');
+          } else {
+            console.log('တခုခု မှားယွင်းနေပါသည်');
+          }
+          resolve(false);
+        },
+        config,
+      );
+    }).then(data => {
+      return data;
+    });
+
+    return response;
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.flex}>
@@ -137,25 +229,25 @@ const MapView = () => {
             animationMode="flyTo"
             animationDuration={1500}
             centerCoordinate={
-              deslocation?.length > 0 ? deslocation : [96.14965243954374, 16.798741608382194]
+              carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194]
             }
             followUserLocation={false}
             defaultSettings={{
               centerCoordinate:
-                deslocation?.length > 0 ? deslocation : [96.14965243954374, 16.798741608382194],
+                carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194],
               followUserLocation: true,
               followUserMode: MapboxGL.UserTrackingModes.Follow,
             }}
             ref={camera => (_camera = camera)}
           />
-          {console.log("deslocation ", deslocation)}
+          {console.log("carLocation ", carLocation)}
           <MapboxGL.MarkerView
             anchor={{ x: 0.5, y: 1 }}
             title="This is a title"
             description="This is a description"
             key={Math.random()}
             coordinate={
-              deslocation?.length > 0 ? deslocation : [96.14965243954374, 16.798741608382194]
+              carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194]
             }>
             <View>
               <Image
@@ -164,38 +256,48 @@ const MapView = () => {
                 source={require('../../../assets/car_location.png')}
               />
             </View>
-          </MapboxGL.MarkerView>  
+          </MapboxGL.MarkerView>
+            <MapboxGL.UserLocation
+              animated={USER_SHOW_LOCATION}
+              style={styles.pointuser}
+              visible={USER_SHOW_LOCATION}
+              showsUserHeadingIndicator={USER_SHOW_LOCATION}
+              onUpdate={newUserLocation =>
+                onUserLocationUpdate(newUserLocation)
+              }
+            />     
+            {console.log("User location:", userLocation)}       
         </MapboxGL.MapView>
         <View
+          style={{
+            alignItems: 'flex-end',
+          }}>
+          <TouchableOpacity
             style={{
-              alignItems: 'flex-end',
+              ...CommonStyle.mapButton,
+              marginVertical: 10,
+            }}
+            onPress={() => {
+              handleStop()
             }}>
-            <TouchableOpacity
-              style={{
-                ...LoginStyle.button02,
-                marginVertical: 10,
-              }}
-              onPress={() => {
-                handleStop()
-              }}>
-              <Text style={LoginStyle.buttonText}>Logout</Text>
-            </TouchableOpacity>
-          </View>
-          <View
+            <Text style={CommonStyle.buttonText}>Log out</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
             style={{
-              alignItems: 'flex-start',
+              ...CommonStyle.mapButton,
+              marginVertical: -60,
+            }}
+            onPress={() => {
+              centeringButtonPress()
             }}>
-            <TouchableOpacity
-              style={{
-                ...LoginStyle.button02,
-                marginVertical: -60,
-              }}
-              onPress={() => {
-                centeringButtonPress()
-              }}>
-              <Text style={LoginStyle.buttonText}>Zoom</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={CommonStyle.buttonText}>Zoom</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -235,6 +337,11 @@ const styles = StyleSheet.create({
   img3: {
     width: 30,
     height: 30,
+  },
+  pointuser: {
+    position: 'absolute',
+    right: 10,
+    bottom: 5,
   },
   nav: {
     position: 'absolute',
