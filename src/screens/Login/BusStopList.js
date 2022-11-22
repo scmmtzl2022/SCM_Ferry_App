@@ -1,7 +1,6 @@
 import React, { useEffect, useContext,useState } from 'react';
 import {
   Text,
-  Image,
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
 } from 'react-native';
 
 import moment from 'moment';
+import axios from 'axios';
 import { Provider } from 'react-native-paper';
 import AllRoute from '../../components/AllRoute';
 import CalendarView from '../../components/CalendarView';
@@ -17,7 +17,7 @@ import { AuthContext } from "../../hooks/context/Context";
 import { LoginStyle } from "./login.style";
 import { removeNoActiveBusStop } from '../../utils/Util';
 
-
+export const BASE_URL = 'http://150.95.82.104:8080/stg-ems/api';
 const BusStopList = ({ navigation }) => {
 
   const Separator = () => <View style={LoginStyle.separator} />;
@@ -26,20 +26,6 @@ const BusStopList = ({ navigation }) => {
     console.log("logout!!")
     logout()
   };
-
-  /**
-   * change date in bus schedule page.
-   * @param {*} param
-   */
-  //  const selectDate = param => {
-  //   // setCurrentTimeSelected(moment(param).format('YYYY-MM-DD'));
-  //   // setSelectedDate(param);
-  //   // setLoading(true);
-  //   // fetchMyAPI(param);
-  //   // check_ferry_no();
-  //   // fetchTimeList();
-  // };
-
   const [busData, setBusData] = useState({});
   const [busStopList, setBusStopList] = useState([]);
   const [highlightIndex, setHighlightIndex] = useState(-1);
@@ -52,18 +38,6 @@ const BusStopList = ({ navigation }) => {
   const { userInfo } = useContext(AuthContext);
   const [socketState, setSocketState] = useState(null);
 
-  const [timeList, setTimeList] = useState({
-    checkHour: '01:00pm',
-    drivingMorningStartTime: '06:00am',
-    drivingMorningEndTime: '08:00am',
-    drivingEveningStartTime: '05:00pm',
-    drivingEveningEndTime: '08:00pm',
-    cancelMorningStartTime: '07:00pm',
-    cancelMorningEndTime: '06:00am',
-    cancelEveningStartTime: '08:00am',
-    cancelEveningEndTime: '05:00pm',
-  });
-
   let current = moment();
   let checkcurrent = current.format('YYYY-MM-DD');
   const [currenttimeSelected, setCurrentTimeSelected] = useState();
@@ -75,65 +49,6 @@ const BusStopList = ({ navigation }) => {
     useState(true);
   const [showTodayEveningSchedule, setShowTodayEveningSchedule] =
     useState(true);
-
-  /**
-   * fetch time list.
-   */
-  async function fetchTimeList() {
-    const timeParam = await getTimeList();
-    if (timeParam) {
-      setTimeList({ ...timeParam });
-      const checkHour = new Date().getHours();
-      if (
-        checkHour >=
-        moment(timeParam?.checkHour, 'h:mma').hours()
-      ) {
-        setTimeFilter(false);
-      } else {
-        setTimeFilter(true);
-      }
-    }
-  }
-
-  /**
-   * request location permission.
-   */
-  const requestlocation = async () => {
-    const response = await new Promise(resolve => {
-      const config = {
-        enableHighAccuracy: true,
-        timeout: 100,
-        maximumAge: 800,
-      };
-      Geolocation.getCurrentPosition(
-        position => {
-          setLocation(position.coords);
-          resolve(position.coords);
-        },
-        error => {
-          // See error code charts below.
-          const { code, message } = error;
-          if (code === 'CANCELLED') {
-            console.log('User ဘက်မှ Location ယူခြင်းကို Canceled လုပ်ထားပါသည်');
-          } else if (code === 'UNAVAILABLE') {
-            Alert.alert('သင်၏ဖုန်းမှ GPS ကို ဖွင့်ပေးပါ');
-          } else if (code === 'TIMEOUT') {
-            Alert.alert('Location ယူခြင်းအချိန် ကျော်လွန်သွားပါပြီ');
-          } else if (code === 'UNAUTHORIZED') {
-            Alert.alert('Location ယူရန်ခွင့်ပြုချက်မရှိပါ');
-          } else {
-            console.log('တခုခု မှားယွင်းနေပါသည်');
-          }
-          resolve(false);
-        },
-        config,
-      );
-    }).then(data => {
-      return data;
-    });
-
-    return response;
-  };
 
   /**
    * request get locaiton.
@@ -163,7 +78,7 @@ const BusStopList = ({ navigation }) => {
     if (userInfo.driverLogin) {
       const response = await requestGetLocation();
     } else {
-      check_ferry_no();
+      // check_ferry_no();
     }
     let checkedIndex = -1;
     let dateParams = null;
@@ -234,37 +149,19 @@ const BusStopList = ({ navigation }) => {
           }
         }
 
-        if (data) {
-          let socket = io(SOCKET_URL);
-          socket.connect();
-          socket.on('connect', () => {
-            setSocketState(socket);
-            socket.on(`driver-route-id ${data.ferryNo}`, response => {
-              check_ferry_no();
-            });
-          });
-          socket.on(`disconnect-driver ${data.ferryNo}`, response => {
-            check_ferry_no();
-          });
-        }
         let updatedBusStopList = [];
 
         if (data !== null && userInfo.driverLogin === false) {
           setBusData(data);
           updatedBusStopList = (timeFilter) ? removeNoActiveBusStop(data.morningData) : removeNoActiveBusStop(data.eveningData);
           setBusStopList(updatedBusStopList);
-          checkedIndex = searchEmployee(
-            updatedBusStopList,
-            userInfo.userInfomation.employeeId,
-            userInfo.userInfomation.company,
-          );
+         
 
           setHighlightIndex(checkedIndex);
           if (checkedIndex >= 0) {
             setUserFerryNo(data.ferryNo);
           }
         } else {
-          check_ferry_no(data);
           setBusData(data);
           updatedBusStopList = timeFilter ? removeNoActiveBusStop(data.morningData) : removeNoActiveBusStop(data.eveningData);
           setBusStopList(updatedBusStopList);
@@ -294,14 +191,11 @@ const BusStopList = ({ navigation }) => {
     setSelectedDate(param);
     setLoading(true);
     fetchMyAPI(param);
-    check_ferry_no();
-    fetchTimeList();
   };
 
   useEffect(() => {
     let callAPI = async () => {
       try {
-        fetchTimeList();
         await fetchMyAPI();
       } catch (e) {
         console.log(e);
@@ -332,12 +226,6 @@ const BusStopList = ({ navigation }) => {
       if (timeFilter) {
         let updatedBusStopList = removeNoActiveBusStop(busData.morningData);
         setBusStopList(updatedBusStopList);
-        checkedIndex = searchEmployee(
-          updatedBusStopList,
-          userInfo.userInfomation.employeeId,
-          userInfo.userInfomation.company,
-        );
-
         if (checkedIndex < 0) {
           setShowTodayMorningSchedule(false);
         } else {
@@ -345,22 +233,12 @@ const BusStopList = ({ navigation }) => {
         }
 
         updatedBusStopList = removeNoActiveBusStop(busData.eveningData);
-        const index = searchEmployee(
-          updatedBusStopList,
-          userInfo.userInfomation.employeeId,
-          userInfo.userInfomation.company,
-        );
         index >= 0
           ? setShowTodayEveningSchedule(true)
           : setShowTodayEveningSchedule(false);
       } else {
         let updatedBusStopList = removeNoActiveBusStop(busData.eveningData);
         setBusStopList(updatedBusStopList);
-        checkedIndex = searchEmployee(
-          updatedBusStopList,
-          userInfo.userInfomation.employeeId,
-          userInfo.userInfomation.company,
-        );
 
         if (checkedIndex < 0) {
           setShowTodayEveningSchedule(false);
@@ -369,16 +247,7 @@ const BusStopList = ({ navigation }) => {
         }
 
         updatedBusStopList = removeNoActiveBusStop(busData.morningData);
-        const index = searchEmployee(
-          updatedBusStopList,
-          userInfo.userInfomation.employeeId,
-          userInfo.userInfomation.company,
-        );
-        index >= 0
-          ? setShowTodayMorningSchedule(true)
-          : setShowTodayMorningSchedule(false);
       }
-      // checkedIndex < 0 ? setError('သင်သည် ယနေ့အတွက် ဖယ်ရီစီးရန် စာရင်းမသွင်းထားပါ') : setError(null);
       setHighlightIndex(checkedIndex);
     } else if (busData !== undefined) {
       if (timeFilter) {
@@ -405,63 +274,9 @@ const BusStopList = ({ navigation }) => {
   }
 
   /**
-   * check driver active with ferryNo
-   */
-  const check_ferry_no = (data = null) => {
-    data = data ? data : busData;
-    let payload = {
-      ferry_no: data.ferryNo,
-      is_active: 1,
-    };
-    axios
-      .post(`${SOCKET_URL}/route/check_ferry_no`, payload)
-      .then(async res => {
-        if (res.data?.length > 0) {
-          setDriverLocation([Number(res.data[0]?.longitude), Number(res.data[0]?.latitude)]);
-          if (userInfo?.driverLogin && data) {
-            const timeParam = await getTimeList();
-            startDriving(data, timeParam);
-          }
-        }
-      });
-  };
-
-  /**
    * cancelRide button function.
    */
   const cancelRide = timeParam => {
-    const company = userInfo.userInfomation.company;
-    const timePeriod = timeParam;
-    const date = selectedDate.format('YYYY-MM-DD');
-    var accessToken = 'Bearer ' + userInfo.token;
-    let configAuth = {
-      headers: { Authorization: accessToken },
-    };
-    axios
-      .post(
-        `${BASE_URL}/cancel?employeeId=${userInfo.userInfomation.employeeId}`,
-        {
-          timePeriod: timePeriod,
-          date: date,
-          company: company,
-        },
-        configAuth,
-      )
-      .then(res => {
-        if (res.data.message == 'Cancel Ferry Successfully!') {
-          notifyMessage(res.data.message);
-          fetchMyAPI(selectedDate);
-          setCancelError(false);
-          setError('ဖယ်ရီ Cancel လုပ်ခြင်း အောင်မြင်ပါသည်');
-        } else {
-          notifyMessage('သင်သည် ယနေ့အတွက် ဖယ်ရီစီးရန် စာရင်းမသွင်းထားပါ');
-          setCancelError(true);
-        }
-      })
-      .catch(err => {
-        setCancelError(true);
-        notifyMessage('သင်သည် ယနေ့အတွက် ဖယ်ရီစီးရန် စာရင်းမသွင်းထားပါ');
-      });
   };
 
   /**
@@ -575,11 +390,6 @@ const BusStopList = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => { checkGoToScreen() }}
             style={styles.nav}>
-            {/* <Image
-              source={require('../../assets/back.png')}
-              style={styles.img3}
-              accessibilityLabel="back-icon"
-            /> */}
           </TouchableOpacity>
         )}
     </View>
@@ -644,44 +454,10 @@ const BusStopList = ({ navigation }) => {
         <SafeAreaView>
         <View style={styles.calendar}>
           <>
-            {/* <View
-              style={{
-                zIndex: 2,
-                top: 40,
-                with: 25,
-                alignItems: 'flex-start',
-              }}>
-              {renderActions()}
-            </View>
-            <View
-              style={{
-                zIndex: 2,
-                top: 40,
-                left: 0,
-                marginRight: 20,
-                with: 15,
-                alignItems: 'flex-end',
-              }}>
-              {((userInfo?.userInfomation?.employeeType !== 5 &&
-                userInfo?.userInfomation?.employeeType !== 1) ||
-                userInfo?.driverLogin === true) && (
-                  <TouchableOpacity onPress={() => { handleLogout() }}>
-                    <Image
-                      source={require('../../assets/icons8-logout-48.png')}
-                      style={styles.image2}
-                    />
-                  </TouchableOpacity>
-                )}
-            </View> */}
           </>
           <CalendarView selectDate={selectDate}/>
         </View>
       </SafeAreaView>
-          {/* <Image
-            source={require('../../../assets/welcome.png')}
-            style={LoginStyle.image2}
-          /> */}
-
           <Separator />
           <View style={LoginStyle.safeContainerStyle}>
           </View>

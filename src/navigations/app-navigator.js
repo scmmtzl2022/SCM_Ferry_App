@@ -12,7 +12,7 @@ export default function AppNavigator() {
       drawerContent={(props) => <SideBar {...props} />}
       screenOptions={headerOption}
     >
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="UserProfile"
         component={UserProfileScreen}
         options={{ headerShown: true, title: "Profile" }}
@@ -21,7 +21,7 @@ export default function AppNavigator() {
         name="busStopList"
         component={BusStopList}
         options={{ headerShown: true, title: "List" }}
-      />
+      /> */}
         <Drawer.Screen
         name="MapView"
         component={MapView}

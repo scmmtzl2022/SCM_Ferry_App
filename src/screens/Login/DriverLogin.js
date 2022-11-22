@@ -9,7 +9,7 @@ import {
   Dimensions,
   DeviceEventEmitter,
 } from 'react-native';
-import {AuthContext} from "../../hooks/context/Context";
+import { AuthContext } from "../../hooks/context/Context";
 import { TextInput, Provider } from 'react-native-paper';
 import DropDown from '../../components/DropDown';
 import { BASE_URL } from '../../config';
@@ -18,7 +18,7 @@ const Separator = () => <View style={styles.separator} />;
 let nameMsg = 'Name is required.';
 let codeMsg = 'Password is required.';
 let codeMatchMsg = 'Passwords is not correct.';
-let company = [{id: 1, name: 'Ko Hein Htoo'}, {id: 2, name: 'Ko Si Thu Aung'}]
+let company = [{ id: 1, name: 'Ko Hein Htoo' }, { id: 2, name: 'Ko Si Thu Aung' }]
 
 const DriverLogin = ({ navigation }) => {
   const { driverLogin } = React.useContext(AuthContext);
@@ -76,33 +76,33 @@ const DriverLogin = ({ navigation }) => {
 
   const onSubmit = async () => {
     !selectedItem ? setnameErr(true) : setnameErr(false);
-    !code ? setcodeErr(true) : setcodeErr(false);  
+    !code ? setcodeErr(true) : setcodeErr(false);
 
     if (selectedItem && code) {
       const res = await onLogin();
-      if (res) {        
-          setcodeNotEqualErr(false);
+      if (res) {
+        setcodeNotEqualErr(false);
       } else {
         setcodeNotEqualErr(true);
       }
     }
   };
-/**
- * Navigation to LoginScreen
- */
+  /**
+   * Navigation to LoginScreen
+   */
   const goToUserLogin = () => {
-        navigation.navigate('UserLogin');
+    navigation.navigate('UserLogin');
   }
 
   return (
     <Provider>
       <SafeAreaView style={styles.contianer}>
-        <View style={styles.safeContainerStyle}>          
-        <DropDown
-              value={selectedItem}
-              data={driverList}
-              onSelect={onSelect}
-            />
+        <View style={styles.safeContainerStyle}>
+          <DropDown
+            value={selectedItem}
+            data={driverList}
+            onSelect={onSelect}
+          />
           <Separator />
           {nameErr ? <Text style={styles.errtxt}>{nameMsg}</Text> : null}
           <Separator />
@@ -142,8 +142,8 @@ const DriverLogin = ({ navigation }) => {
             }}>
             <Text>Are you an employee? </Text>
             <TouchableOpacity
-               onPress={() => {goToUserLogin()}}>
-              <Text style={styles.link}>Employee Login</Text> 
+              onPress={() => { goToUserLogin() }}>
+              <Text style={styles.link}>Employee Login</Text>
             </TouchableOpacity>
           </View>
         </View>

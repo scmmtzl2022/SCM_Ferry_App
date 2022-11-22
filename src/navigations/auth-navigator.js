@@ -16,14 +16,14 @@ const Stack = createNativeStackNavigator();
 
 export default function AuthNavigator() {
   const { userInfo, splashLoading } = useContext(AuthContext);
-  function UserProfileScreen() {
-    return (
-      <Tab.Navigator tabBarPosition="top">
-        <Tab.Screen name="List" component={BusStopList} />
-        <Tab.Screen name="Map" component={MapView} />
-      </Tab.Navigator>
-    );
-  }
+  // function UserProfileScreen() {
+  //   return (
+  //     <Tab.Navigator tabBarPosition="top">
+  //       <Tab.Screen name="List" component={BusStopList} />
+  //       <Tab.Screen name="Map" component={MapView} />
+  //     </Tab.Navigator>
+  //   );
+  // }
   const Tab = createMaterialTopTabNavigator();
   return (
     <Stack.Navigator>
@@ -35,7 +35,7 @@ export default function AuthNavigator() {
         />
       ) : userInfo?.token ? (
         <>
-          <Stack.Screen
+          {/* <Stack.Screen
             name="UserProfile"
             component={UserProfileScreen}
             options={{ headerShown: false }}
@@ -44,7 +44,7 @@ export default function AuthNavigator() {
             name="BusStopList"
             component={BusStopList}
             options={{ headerShown: false }}
-          />
+          /> */}
           <Stack.Screen
             name="MapView"
             component={MapView}
@@ -59,11 +59,11 @@ export default function AuthNavigator() {
             component={LoginScreen}
             options={{ headerShown: false }}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             name="DriverLogin"
             component={DriverLogin}
             options={{ headerShown: false }}
-          />
+          /> */}
         </>
       )}
     </Stack.Navigator>

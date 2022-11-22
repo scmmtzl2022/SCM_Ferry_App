@@ -3,10 +3,8 @@ import {
   Text,
   TextInput,
   Image,
-  Dimensions,
   TouchableOpacity,
   View,
-  LoginStyleheet,
 } from 'react-native';
 
 import {Provider} from 'react-native-paper';
@@ -34,7 +32,8 @@ const UserLoginScreen = ({navigation}) => {
   const Separator = () => <View style={LoginStyle.separator} />;
   const [selectedItem, setSelectedItem] = useState(null)
   const onSelect = (item) => {
-    setcompanyName(item)
+    setcompanyName(item);
+    setSelectedItem(item);
   }
 
   const onLoginUser = () => {
@@ -58,9 +57,7 @@ const UserLoginScreen = ({navigation}) => {
       }
       }
     }
-  const goToUserLogin = () => {
-    navigation.navigate('DriverLogin');
-}    
+
   return (
     <Provider>
       <View style={LoginStyle.container}>
@@ -114,22 +111,6 @@ const UserLoginScreen = ({navigation}) => {
               }}>
               <Text style={LoginStyle.buttonText}>Login</Text>
             </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              alignItems: 'center',
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-              }}>
-              <Text>Are you a driver? </Text>
-              <TouchableOpacity
-                onPress={() => goToUserLogin()}>
-                <Text style={LoginStyle.link}>Driver Login</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </View>

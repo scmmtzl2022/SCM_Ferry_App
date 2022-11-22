@@ -76,6 +76,7 @@ const LoginStyle = StyleSheet.create({
       elevation: 10,
       borderRadius: 15,
       height: 50,
+      margin:10,
     },
     button03: {
       justifyContent: 'center',
