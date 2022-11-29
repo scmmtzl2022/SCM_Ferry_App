@@ -1,20 +1,19 @@
-import * as React from "react";
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import React, { useContext } from "react";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../screens/Login/login";
-import DriverLogin from "../screens/Login/DriverLogin";
-import { AuthContext } from "../hooks/context/Context";
-import { useContext } from "react";
-import SplashScreen from "../screens/Splash/SplashScreen";
-import MapView from "../screens/Login/MapView";
-import BusSchedule from "../screens/Login/BusSchedule";
+import { AuthContext } from "../context/AuthContext";
+import LoginScreen from "../screens/login";
+import DriverLogin from "../screens/DriverLogin";
+import SplashScreen from "../screens/SplashScreen";
+import MapView from "../screens/MapView";
+import BusSchedule from "../screens/BusSchedule";
 
 const Stack = createNativeStackNavigator();
 
-export default function AuthNavigator() {
+const Navigation = ({}) => {
   const { userInfo, splashLoading } = useContext(AuthContext);
-  const Tab = createMaterialTopTabNavigator();
   return (
+    <NavigationContainer>
     <Stack.Navigator>
       {splashLoading ? (
         <Stack.Screen
@@ -52,5 +51,8 @@ export default function AuthNavigator() {
         </>
       )}
     </Stack.Navigator>
+    </NavigationContainer>
   );
 }
+
+export default Navigation;

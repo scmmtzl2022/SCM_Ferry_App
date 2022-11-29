@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { BASE_URL } from "../../config"
-import { AuthContext } from "../context/Context";
+import React, { createContext, useEffect, useState } from 'react';
+import { BASE_URL } from "../config"
+
+export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState({});

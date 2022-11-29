@@ -13,12 +13,12 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import axios from 'axios';
-import { removeNoActiveBusStop, searchEmployee, getTimeList } from '../../utils/Util';
-import { AuthContext } from '../../hooks/context/Context';
-import CalendarView from '../../components/CalendarView';
-import ErrorComponent from '../../components/ErrorComponent';
-import AllRoute from '../../components/AllRoute';
-import { BASE_URL } from '../../config';
+import { removeNoActiveBusStop, searchEmployee, getTimeList } from '../utils/Util';
+import { AuthContext } from '../context/AuthContext';
+import CalendarView from '../components/CalendarView';
+import ErrorComponent from '../components/ErrorComponent';
+import AllRoute from '../components/AllRoute';
+import { BASE_URL } from '../config';
 
 const BusScheduleScreen = ({ navigation }) => {
   const [busData, setBusData] = useState({});
@@ -392,7 +392,7 @@ const BusScheduleScreen = ({ navigation }) => {
             }}
             style={styles.nav}>
             <Image
-              source={require('../../../assets/back.png')}
+              source={require('../../assets/back.png')}
               style={styles.img3}
               accessibilityLabel="back-icon"
             />
@@ -484,7 +484,7 @@ const BusScheduleScreen = ({ navigation }) => {
                       handleLogout();
                     }}>
                     <Image
-                      source={require('../../../assets/icons8-logout-48.png')}
+                      source={require('../../assets/icons8-logout-48.png')}
                       style={styles.image2}
                     />
                   </TouchableOpacity>

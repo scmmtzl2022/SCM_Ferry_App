@@ -10,7 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import moment from 'moment';
-import { AuthContext } from '../hooks/context/Context';
+import { AuthContext } from '../context/AuthContext';
 import { Provider } from 'react-native-paper';
 import DropDown from '../components/DropDown';
 import BusStopAccordion from './BusStopAccordion';

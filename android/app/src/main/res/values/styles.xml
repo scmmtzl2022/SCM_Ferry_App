@@ -1,4 +1,9 @@
 <resources>
+    <item  name="blue"  type="color">#00C4D1
+    </item>
+    <integer-array  name="androidcolors">
+    <item>@color/blue</item>
+    </integer-array>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">

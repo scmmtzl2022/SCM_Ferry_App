@@ -1,12 +1,15 @@
-import { StatusBar, StyleSheet, Text, View } from "react-native";
-import AppContainer from "./src/navigations";
-import * as React from 'react'
-import { AuthProvider } from "./src/hooks/provider/AuthProvider";
+import React from 'react';
+import { StatusBar } from "react-native";
+import Navigation from "./src/navigations/auth-navigator";
+import { AuthProvider } from "./src/context/AuthContext";
 
-export default function App() {
+const App = () => {
   return (
     <AuthProvider>  
-        <AppContainer />
+      <StatusBar backgroundColor="#06bcee" />
+        <Navigation/>
     </AuthProvider>
   );
-}
+};
+
+export default App;

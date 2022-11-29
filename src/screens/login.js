@@ -8,8 +8,8 @@ import {
 } from 'react-native';
 
 import { Provider } from 'react-native-paper';
-import DropDown from '../../components/DropDown';
-import { AuthContext } from "../../hooks/context/Context";
+import DropDown from '../components/DropDown';
+import { AuthContext } from '../context/AuthContext';
 import { CommonStyle } from "./common.style";
 
 let loginMsg = 'Login id is required.';
@@ -66,7 +66,7 @@ const UserLoginScreen = ({navigation}) => {
         <Text style={CommonStyle.titletxt}>Welcome</Text>
         <View style={CommonStyle.wrapper}>
           <Image
-            source={require('../../../assets/welcome.png')}
+            source={require('../../assets/welcome.png')}
             style={CommonStyle.image2}
           />
           <Separator />

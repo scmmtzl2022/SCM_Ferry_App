@@ -9,10 +9,10 @@ import {
   DeviceEventEmitter,
   TextInput,
 } from 'react-native';
-import { AuthContext } from "../../hooks/context/Context";
+import { AuthContext } from "../context/AuthContext";
 import { Provider } from 'react-native-paper';
-import DropDown from '../../components/DropDown';
-import { BASE_URL } from '../../config';
+import DropDown from '../components/DropDown';
+import { BASE_URL } from '../config';
 
 const Separator = () => <View style={styles.separator} />;
 let nameMsg = 'Name is required.';

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, } from "react-native";
-import imagesPath from '../utils/constants/imagesPath'
 
 const DropDown = ({
     data = [],
@@ -32,7 +31,7 @@ const DropDown = ({
                     width: 12,
                     height: 12,
                     transform: [{ rotate: showOption ? '180deg' : '0deg' }]
-                }} source={imagesPath.icDropDown} />
+                }} source={require('../../assets/images/dropdown.png')} />
             </TouchableOpacity>
             {showOption && (<View style={{
                 marginTop: 55,

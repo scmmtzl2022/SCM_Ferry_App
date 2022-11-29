@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, SafeAreaView, View, Image, Text, Dimensions, TouchableOpacity, Alert,Linking, } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, SafeAreaView, View, Image, Text, Dimensions, TouchableOpacity, Alert,Linking, InteractionManager, } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import axios from 'axios';
 import qs from 'qs';
 import moment from 'moment';
 import { CommonStyle } from "./common.style";
-import { accessToken } from "../../config";
+import { accessToken } from "../config";
 import Geolocation from 'react-native-geolocation-service';
 import GetLocation from 'react-native-get-location';
 import ButtonDrawer from 'react-native-bottom-drawer-view';
@@ -20,6 +20,7 @@ const MapView = ({ navigation, route }) => {
   let [userLocation, setUserLocation] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   let _camera;
+  let timer;
   console.log("route.params => ", route.params.IMEIName, route.params.driverPhone);
   const USER_SHOW_LOCATION = true;
   /**
@@ -47,7 +48,6 @@ const MapView = ({ navigation, route }) => {
 
     // axios(getOption).then(res => {
     //   console.log("Access Token :", res.data.result.accessToken);
-    // setInterval(() => {
     let GMTstyle = moment().utc();
     let current = GMTstyle.format('YYYY-MM-DD HH:mm:ss');
     const data = {
@@ -57,29 +57,62 @@ const MapView = ({ navigation, route }) => {
       'sign_method': 'md5',
       'v': 0.9,
       'format': 'json',
-      'access_token': '1a1637e4e8becda0289dc081fbf2f87c',
+      'access_token': '737ef335cb659a738f851ddc989305dd',
       'imeis': '865784052487926,865784052827931',
       'map_type': 'GOOGLE',
     };
-    //       console.log("current :", current);     
-    //       console.log("Location request params :", data);
-    // const options = {
-    //   method: 'POST',
-    //   headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    //   data: qs.stringify(data),
-    //   url: 'https://hk-open.tracksolidpro.com/route/rest',
-    // };
-    // axios(options).then(res => {
-    //   let imeiList;
-    //   imeiList = res.data.result;
-    //   const selectedIMEI = imeiList.filter(item => item.imei === route.params.IMEIName);
-    //   console.log("Car Location by IMEI device => ", [selectedIMEI[0].lng, selectedIMEI[0].lat])
-
-    // })
-      // .catch(err => {
-      //   console.log("Location request from GPS device failed.", err)
-      // })
-    // }, 5000);
+          console.log("current :", current);     
+          console.log("Location request params :", data);
+    const options = {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      data: qs.stringify(data),
+      url: 'https://hk-open.tracksolidpro.com/route/rest',
+    };
+    axios(options).then(res => {
+      let imeiList;
+      imeiList = res.data.result;
+      const selectedIMEI = imeiList.filter(item => item.imei === route.params.IMEIName);
+      setCarLocation([selectedIMEI[0].lng, selectedIMEI[0].lat]);
+      console.log("Car Location by IMEI device => ", [selectedIMEI[0].lng, selectedIMEI[0].lat])
+    })
+      .catch(err => {
+        console.log("Location request from GPS device failed.", err)
+      })
+    timer = setInterval(() => {
+    let GMTstyle = moment().utc();
+    let current = GMTstyle.format('YYYY-MM-DD HH:mm:ss');
+    const data = {
+      'method': 'jimi.device.location.get',
+      'timestamp': current,
+      'app_key': '8FB345B8693CCD00E97951CC35B1045A',
+      'sign_method': 'md5',
+      'v': 0.9,
+      'format': 'json',
+      'access_token': '737ef335cb659a738f851ddc989305dd',
+      'imeis': '865784052487926,865784052827931',
+      'map_type': 'GOOGLE',
+    };
+          console.log("current :", current);     
+          console.log("Location request params :", data);
+    const options = {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      data: qs.stringify(data),
+      url: 'https://hk-open.tracksolidpro.com/route/rest',
+    };
+    axios(options).then(res => {
+      let imeiList;
+      imeiList = res.data.result;
+      const selectedIMEI = imeiList.filter(item => item.imei === route.params.IMEIName);
+      setCarLocation([selectedIMEI[0].lng, selectedIMEI[0].lat]);
+      console.log("Car Location by IMEI device => ", [selectedIMEI[0].lng, selectedIMEI[0].lat])
+    })
+      .catch(err => {
+        console.log("Location request from GPS device failed.", err)
+      })
+    }, 30000);
+     
     // }
     // )
     // .catch(err => {
@@ -87,7 +120,13 @@ const MapView = ({ navigation, route }) => {
     // })
 
   }
-
+  /**
+   * Clear interval
+   */
+  const StopInterval=()=>{
+    clearInterval(timer);
+    console.log("Cleared interval!!!");
+  }
   /**
    * Zoom button
    */
@@ -104,13 +143,17 @@ const MapView = ({ navigation, route }) => {
     setModalVisible(true);
     requestGetLocation();
     centeringButtonPress();
+    return ()=>{
+      StopInterval();
+    }
   }, []);
 
   const stopPress = () => {
-    console.log("Back to BusScheduleScreen!!")
-    navigation.navigate('BusScheduleScreen')
+    StopInterval();
     setCarLocation(null);
     setUserLocation(null);
+    console.log("Back to BusScheduleScreen!!")
+    navigation.navigate('BusScheduleScreen')
   };
   const handleStop = async () => {
     return Alert.alert(
@@ -238,7 +281,7 @@ const MapView = ({ navigation, route }) => {
           }}>
           <Image
             style={styles.img2}
-            source={require('../../../assets/minus.png')}
+            source={require('../../assets/minus.png')}
             accessibilityLabel="minus-sign"
           />
         </View>
@@ -268,7 +311,7 @@ const MapView = ({ navigation, route }) => {
                   }}>
                   <Image
                     style={styles.image}
-                    source={require('../../../assets/car.png')}
+                    source={require('../../assets/car.png')}
                   />
                   <Text style={styles.paragraph}>{route?.params?.IMEIName}</Text>
                 </View>
@@ -281,7 +324,7 @@ const MapView = ({ navigation, route }) => {
                   }}>
                   <Image
                     style={styles.image3}
-                    source={require('../../../assets/driver.png')}
+                    source={require('../../assets/driver.png')}
                   />
                   <Text style={styles.paragraph}>
                     {route?.params?.driverName}
@@ -307,7 +350,7 @@ const MapView = ({ navigation, route }) => {
                   onPress={() => phonecall(route?.params?.driverPhone)}>
                   <Image
                     style={styles.img}
-                    source={require('../../../assets/phone.png')}
+                    source={require('../../assets/phone.png')}
                   />
                 </TouchableOpacity>
               </View>
@@ -371,7 +414,7 @@ const MapView = ({ navigation, route }) => {
               <Image
                 testID="car-location{renderModal()}"
                 style={styles.car_location}
-                source={require('../../../assets/car_location.png')}
+                source={require('../../assets/car_location.png')}
               />
             </View>
           </MapboxGL.MarkerView>
