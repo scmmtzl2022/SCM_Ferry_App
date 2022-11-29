@@ -225,6 +225,22 @@ android {
             include (*reactNativeArchitectures())
         }
     }
+    //Release V1.1  21st Oct 2022
+    signingConfigs {
+        release {
+        storeFile file('your_key_name.keystore')
+        storePassword 'SCMferry2022'
+        keyAlias 'your_key_alias'
+        keyPassword 'SCMferry2022'
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
+        }
+    }
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

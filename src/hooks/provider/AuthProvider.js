@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
       })
       .then(res => {
         let userInfo = res.data;
+        userInfo.driverLogin = false;
         setUserInfo(userInfo);
         AsyncStorage.setItem('userInfo', JSON.stringify(userInfo));
         setIsLoading(false);
@@ -60,7 +61,30 @@ export const AuthProvider = ({ children }) => {
       console.log(`is logged in error ${e}`);
     }
   };
-
+  /**
+   * Driver Login
+   */
+   const driverLogin = async (Id, password) => {
+    setIsLoading(true);
+    const res = await axios
+      .post(`${BASE_URL}/driverLogin`, {
+        driverId: Id,
+        password: password,
+      })
+      .then(res => {
+        let driverInfo = res.data;
+        driverInfo.driverLogin = true;
+        setUserInfo(driverInfo);
+        AsyncStorage.setItem('userInfo', JSON.stringify(driverInfo));
+        setIsLoading(false);
+        return true;
+      })
+      .catch(e => {
+        setIsLoading(false);
+        return false;
+      });
+    return res;
+  };
   /**
    * user logout function.
    */
@@ -71,6 +95,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     isLoggedIn();
+    driverLogin();
   }, []);
 
   return (
@@ -80,6 +105,7 @@ export const AuthProvider = ({ children }) => {
         userInfo,
         splashLoading,
         login,
+        driverLogin,
         logout,
       }}>
       {children}

@@ -30,7 +30,7 @@ const CalendarView = ({ selectDate }) => {
         }}
         style={{ height: 100, paddingTop: 20, paddingBottom: 10 }}
         calendarHeaderStyle={{ color: 'white' }}
-        calendarColor={'#00c292'}
+        calendarColor={'#167D7F'}
         dateNameStyle={{ color: 'white' }}
         highlightDateNumberStyle={{ color: 'yellow' }}
         highlightDateNameStyle={{ color: 'yellow' }}

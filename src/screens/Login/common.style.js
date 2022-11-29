@@ -81,7 +81,7 @@ const CommonStyle = StyleSheet.create({
     justifyContent: 'space-between',
     width: Dimensions.get('window').width / 4.2,
     backgroundColor: '#87ceeb',
-    borderRadius: 20,
+    borderRadius: 4,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,

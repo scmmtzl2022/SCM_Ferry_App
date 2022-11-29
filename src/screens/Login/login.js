@@ -10,14 +10,14 @@ import {
 import { Provider } from 'react-native-paper';
 import DropDown from '../../components/DropDown';
 import { AuthContext } from "../../hooks/context/Context";
-import { CommonStyle} from "./common.style";
+import { CommonStyle } from "./common.style";
 
 let loginMsg = 'Login id is required.';
 let companyNameMsg = 'Company name is required.';
 let codeMsg = 'Password is required.';
 let codeMatchMsg = 'Login ID or Password is not correct.';
 let company = [{ id: 1, name: 'SCM' }, { id: 2, name: 'CGM' }]
-const UserLoginScreen = () => {
+const UserLoginScreen = ({navigation}) => {
   const [loginId, setloginId] = useState(null);
   const [loginIDErr, setloginIdErr] = useState(false);
   const [password, setPassword] = useState(null);
@@ -55,7 +55,11 @@ const UserLoginScreen = () => {
       }
     }
   }
-
+  const goToDriverLogin = () => {
+    navigation.navigate('DriverLogin', {
+      driverLoginStatus: 'true'
+    });
+}    
   return (
     <Provider>
       <View style={CommonStyle.container}>
@@ -68,8 +72,8 @@ const UserLoginScreen = () => {
           <Separator />
           {codeMatchErr ? (
             <Text style={CommonStyle.errtxt}>{codeMatchMsg}</Text>
-          ) : null}  
-          <Separator />        
+          ) : null}
+          <Separator />
           <TextInput
             style={CommonStyle.textboxInput}
             value={loginId}
@@ -111,6 +115,22 @@ const UserLoginScreen = () => {
               }}>
               <Text style={CommonStyle.buttonText}>Login</Text>
             </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              alignItems: 'center',
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}>
+              <Text>Are you a driver? </Text>
+              <TouchableOpacity
+                onPress={() => goToDriverLogin()}>
+                <Text style={CommonStyle.link}>Driver Login</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>

@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, } from "react-native";
 import imagesPath from '../utils/constants/imagesPath'
 
 const DropDown = ({
     data = [],
+    busSchedulePage,
+    driverLoginPage,
     value = {},
-    onSelect = () => { }
+    onSelect = (item) => { }
 }) => {
     const [showOption, setShowOption] = useState(false)
     const onSelectedItem = (val) => {
@@ -18,33 +20,59 @@ const DropDown = ({
                 style={styles.dropDownStyle}
                 onPress={() => setShowOption(!showOption)}
             >
-                <Text>{!!value ? value?.name : `Choose company`}</Text>
+                {(
+                    driverLoginPage ?
+                        <Text>{Object.entries(value).length > 0 ? value?.name : `Choose IMEI Number`}</Text>
+                        : busSchedulePage ?
+                            <Text>{!!value ? value?.name : `Choose Ferry`}</Text>
+                            :
+                            <Text>{!!value ? value?.name : `Choose Company`}</Text>
+                )}
                 <Image style={{
                     width: 12,
                     height: 12,
                     transform: [{ rotate: showOption ? '180deg' : '0deg' }]
                 }} source={imagesPath.icDropDown} />
             </TouchableOpacity>
-            {showOption && (<View>
-                {data.map((val, i) => {
-                    return (
-                        <TouchableOpacity
-                            key={String(i)}
-                            onPress={() => onSelectedItem(val)}
-                            style={{
-                                backgroundColor: 'white',
-                                paddingVertical: 10,
-                                borderRadius: 4,
-                                paddingHorizontal: 10,
-                                top: 5,
-                                marginBottom: 5,
-                            }}
-                        >
-                            <Text >{val.name}</Text>
-                        </TouchableOpacity>
+            {showOption && (<View style={{
+                marginTop: 55,
+                backgroundColor: '#dcdcdc',
+                width: '100%',
+                padding: 0,
+                maxHeight: 220,
+                borderRadius: 8,
+                borderStyle: 'solid',
+                zIndex: 2,
+                position: 'absolute',
 
-                    )
-                })}
+            }}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                >
+                    {data.map((val, i) => {
+                        return (
+                            <TouchableOpacity
+                                key={String(i)}
+                                onPress={() => onSelectedItem(val)}
+                                style={{
+                                    top: 1,
+                                    backgroundColor: 'white',
+                                    paddingVertical: 15,
+                                    paddingHorizontal: 15,
+                                    color: 'black',
+                                    borderStyle: 'solid',
+                                    marginBottom: 0.9,
+                                    borderRadius: 2,
+                                    alignItems: 'flex-start'
+                                }}
+                            >
+                                <Text style={{
+                                    color: 'black',
+                                }}>{val.name}</Text>
+                            </TouchableOpacity>
+                        )
+                    })}
+                </ScrollView>
             </View>)}
         </View>
     );
@@ -54,13 +82,11 @@ const styles = StyleSheet.create({
     dropDownStyle: {
         backgroundColor: 'white',
         padding: 8,
-        borderRadius: 6,
-        minHeight: 42,
+        borderRadius: 8,
+        minHeight: 52,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        borderBottomColor: 'gray',
-        borderBottomWidth: 0.5,
     },
 
 });
