@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { createContext, useEffect, useState } from 'react';
-import { BASE_URL } from "../config"
+import { BASE_URL } from "../Config"
 
 export const AuthContext = createContext();
 
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
   /**
    * Driver Login
    */
-   const driverLogin = async (Id, password) => {
+  const driverLogin = async (Id, password) => {
     setIsLoading(true);
     const res = await axios
       .post(`${BASE_URL}/driverLogin`, {

@@ -21,7 +21,7 @@ const DropDown = ({
             >
                 {(
                     driverLoginPage ?
-                        <Text>{Object.entries(value).length > 0 ? value?.name : `Choose IMEI Number`}</Text>
+                        <Text>{Object.entries(value).length > 0 ? value?.name : `Choose Name`}</Text>
                         : busSchedulePage ?
                             <Text>{!!value ? value?.name : `Choose Ferry`}</Text>
                             :
@@ -38,7 +38,7 @@ const DropDown = ({
                 backgroundColor: '#dcdcdc',
                 width: '100%',
                 padding: 0,
-                maxHeight: 220,
+                maxHeight: 151,
                 borderRadius: 8,
                 borderStyle: 'solid',
                 zIndex: 2,
@@ -46,7 +46,9 @@ const DropDown = ({
 
             }}>
                 <ScrollView
+                    showsHorizontalScrollIndicator={true}
                     showsVerticalScrollIndicator={false}
+                    {...data} nestedScrollEnabled={true}
                 >
                     {data.map((val, i) => {
                         return (

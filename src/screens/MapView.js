@@ -1,129 +1,54 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, SafeAreaView, View, Image, Text, Dimensions, TouchableOpacity, Alert,Linking, InteractionManager, } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, SafeAreaView, View, Image, TouchableOpacity, Linking, } from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import axios from 'axios';
-import qs from 'qs';
 import moment from 'moment';
-import { CommonStyle } from "./common.style";
-import { accessToken } from "../config";
-import Geolocation from 'react-native-geolocation-service';
-import GetLocation from 'react-native-get-location';
-import ButtonDrawer from 'react-native-bottom-drawer-view';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import { CommonStyle } from "./Common.style";
+import { accessToken } from "../Config";
+import { AuthContext } from '../context/AuthContext';
+import MapboxDirectionsFactory from '@mapbox/mapbox-sdk/services/directions';
+import { lineString as makeLineString } from '@turf/helpers';
+import { BASE_URL, JIMI_URL, callTimer } from '../Config';
+import gps from '../../assets/gps.png';
 
 MapboxGL.setAccessToken(accessToken);
+const directionsClient = MapboxDirectionsFactory({ accessToken });
 const MapView = ({ navigation, route }) => {
   let [carLocation, setCarLocation] = useState(null);
-  let [userLocation, setUserLocation] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  let [allBusStopArr, setAllBusStop] = useState();
+  let [allRouteArr, setRoute] = useState([]);
   let _camera;
   let timer;
-  console.log("route.params => ", route.params.IMEIName, route.params.driverPhone);
-  const USER_SHOW_LOCATION = true;
+  const [modalVisible, setModalVisible] = useState(false);
+  const { userInfo } = useContext(AuthContext);
+  const [modalObject, setmodalObject] = useState(null);
+  /**
+   * Call jimi location api
+   */
+  const callJimiLocationInterface = () => {
+    axios
+      .get(`${JIMI_URL}`)
+      .then(response => {
+        const selectedIMEI = response?.data?.imeiList.find(item => item.imei === '865784052487926');
+        setCarLocation([selectedIMEI.lng, selectedIMEI.lat]);
+      })
+      .catch(err => {
+        console.log("Location request from GPS device failed.", err)
+      });
+  }
   /**
    * Get access token
    */
-  const getAccessToken = () => {
-    // const dataToken = {
-    //   'method': 'jimi.oauth.token.get',
-    //   'timestamp': current,
-    //   'app_key': '8FB345B8693CCD00E97951CC35B1045A',
-    //   'sign_method': 'md5',
-    //   'v': 0.9,
-    //   'format': 'json',
-    //   'user_id': 'cityapiuser',
-    //   'user_pwd_md5': '21218cca77804d2ba1922c33e0151105',
-    //   'expires_in': 7200,
-    // };
-    // const getOption = {
-    //   method: 'POST',
-    //   headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    //   data: qs.stringify(dataToken),
-    //   url: 'https://hk-open.tracksolidpro.com/route/rest',
-    // };
-    // console.log("response token!!");
-
-    // axios(getOption).then(res => {
-    //   console.log("Access Token :", res.data.result.accessToken);
-    let GMTstyle = moment().utc();
-    let current = GMTstyle.format('YYYY-MM-DD HH:mm:ss');
-    const data = {
-      'method': 'jimi.device.location.get',
-      'timestamp': current,
-      'app_key': '8FB345B8693CCD00E97951CC35B1045A',
-      'sign_method': 'md5',
-      'v': 0.9,
-      'format': 'json',
-      'access_token': '737ef335cb659a738f851ddc989305dd',
-      'imeis': '865784052487926,865784052827931',
-      'map_type': 'GOOGLE',
-    };
-          console.log("current :", current);     
-          console.log("Location request params :", data);
-    const options = {
-      method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      data: qs.stringify(data),
-      url: 'https://hk-open.tracksolidpro.com/route/rest',
-    };
-    axios(options).then(res => {
-      let imeiList;
-      imeiList = res.data.result;
-      const selectedIMEI = imeiList.filter(item => item.imei === route.params.IMEIName);
-      setCarLocation([selectedIMEI[0].lng, selectedIMEI[0].lat]);
-      console.log("Car Location by IMEI device => ", [selectedIMEI[0].lng, selectedIMEI[0].lat])
-    })
-      .catch(err => {
-        console.log("Location request from GPS device failed.", err)
-      })
+  const getLocation = () => {
+    callJimiLocationInterface();
     timer = setInterval(() => {
-    let GMTstyle = moment().utc();
-    let current = GMTstyle.format('YYYY-MM-DD HH:mm:ss');
-    const data = {
-      'method': 'jimi.device.location.get',
-      'timestamp': current,
-      'app_key': '8FB345B8693CCD00E97951CC35B1045A',
-      'sign_method': 'md5',
-      'v': 0.9,
-      'format': 'json',
-      'access_token': '737ef335cb659a738f851ddc989305dd',
-      'imeis': '865784052487926,865784052827931',
-      'map_type': 'GOOGLE',
-    };
-          console.log("current :", current);     
-          console.log("Location request params :", data);
-    const options = {
-      method: 'POST',
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      data: qs.stringify(data),
-      url: 'https://hk-open.tracksolidpro.com/route/rest',
-    };
-    axios(options).then(res => {
-      let imeiList;
-      imeiList = res.data.result;
-      const selectedIMEI = imeiList.filter(item => item.imei === route.params.IMEIName);
-      setCarLocation([selectedIMEI[0].lng, selectedIMEI[0].lat]);
-      console.log("Car Location by IMEI device => ", [selectedIMEI[0].lng, selectedIMEI[0].lat])
-    })
-      .catch(err => {
-        console.log("Location request from GPS device failed.", err)
-      })
-    }, 30000);
-     
-    // }
-    // )
-    // .catch(err => {
-    //   console.log("Token request failed!!!", err)
-    // })
-
+      callJimiLocationInterface();
+    }, callTimer * 1000);
   }
   /**
    * Clear interval
    */
-  const StopInterval=()=>{
+  const StopInterval = () => {
     clearInterval(timer);
     console.log("Cleared interval!!!");
   }
@@ -137,13 +62,12 @@ const MapView = ({ navigation, route }) => {
         1000,
       );
   };
-
   useEffect(() => {
-    getAccessToken();
+    getLocation();
+    getAllRoutes(route.params.selectedFerry);
     setModalVisible(true);
-    requestGetLocation();
     centeringButtonPress();
-    return ()=>{
+    return () => {
       StopInterval();
     }
   }, []);
@@ -151,235 +75,168 @@ const MapView = ({ navigation, route }) => {
   const stopPress = () => {
     StopInterval();
     setCarLocation(null);
-    setUserLocation(null);
-    console.log("Back to BusScheduleScreen!!")
-    navigation.navigate('BusScheduleScreen')
-  };
-  const handleStop = async () => {
-    return Alert.alert(
-      'မြေပုံမှထွက်ရန်',
-      'မြေပုံမှထွက်မှာသေချာပါသလား။',
-      [
-        {
-          text: 'မထွက်ပါ',
-          onPress: () => { },
-        },
-        {
-          text: 'ထွက်မည်',
-          onPress: () => {
-            stopPress();
-          },
-        },
-      ],
-    );
+    navigation.navigate(`ListView`);
   };
 
   /**
-   * on user location update.
-   * @param {*} newUserLocation
+   * Get all route
    */
-  const onUserLocationUpdate = () => {
-    userLocation
-    console.log('User location :', userLocation);
-  };
-
-  /**
-   * request location with Geolocation API.
-   * @returns
-   */
-  const _requestLocation = async () => {
-    const response = await new Promise(resolve => {
-      const config = {
-        enableHighAccuracy: true,
-        timeout: 100,
-        maximumAge: 800,
-      };
-      Geolocation.getCurrentPosition(
-        position => {
-          setUserLocation([
-            position.coords.longitude,
-            position.coords.latitude,
-          ]);
-          console.log("User Location request!!");
-          resolve(position.coords);
-        },
-        error => {
-          // See error code charts below.
-          const { code, message } = error;
-          if (code === 'CANCELLED') {
-            console.log('User ဘက်မှ Location ယူခြင်းကို Canceled လုပ်ထားပါသည်');
-          } else if (code === 'UNAVAILABLE') {
-            Alert.alert('သင်၏ဖုန်းမှ GPS ကို ဖွင့်ပေးပါ');
-          } else if (code === 'TIMEOUT') {
-            Alert.alert('Location ယူခြင်းအချိန် ကျော်လွန်သွားပါပြီ');
-          } else if (code === 'UNAUTHORIZED') {
-            Alert.alert('Location ယူရန်ခွင့်ပြုချက်မရှိပါ');
-          } else {
-            console.log('တခုခု မှားယွင်းနေပါသည်');
+  async function getAllRoutes(ferryActiveList) {
+    let dateParams = moment().format('YYYY-MM-DD');
+    let accessToken = `Bearer ` + userInfo.token;
+    let configAuth = {
+      headers: { Authorization: accessToken },
+    };
+    await axios
+      .get(`${BASE_URL}/route?date=${dateParams}`, configAuth)
+      .then(response => {
+        if (response.data) {
+          const busallRoute = response.data;
+          const activeIndex = busallRoute.routeData.find(
+            ferry => ferry.ferryNo === ferryActiveList.name,
+          );
+          if (activeIndex.morningData?.length > 0) {
+            drawRoute(activeIndex, '#167D7F');
+            setAllBusStop(activeIndex.morningData);
           }
-          resolve(false);
-        },
-        config,
-      );
-    }).then(data => {
-      return data;
-    });
-
-    return response;
-  };
-  /**
-  * request get locaiton.
-  * @returns
-  */
-  const requestGetLocation = async () => {
-    const response = await GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-    })
-      .then(async location => {
-        setInterval(() => {
-          setUserLocation([location.longitude, location.latitude]);
-          return location;
-        }, 10000);
-      })
-      .catch(async ex => {
-        const { code, message } = ex;
-        console.warn(code, message);
-        if (code === 'CANCELLED') {
-          console.log('User ဘက်မှ Location ယူခြင်းကို Canceled လုပ်ထားပါသည်');
-        } else if (code === 'UNAVAILABLE') {
-          Alert.alert('သင်၏ဖုန်းမှ GPS ကို ဖွင့်ပေးပါ');
-        } else if (code === 'TIMEOUT') {
-          Alert.alert('Location ယူခြင်းအချိန် ကျော်လွန်သွားပါပြီ');
-        } else if (code === 'UNAUTHORIZED') {
-          Alert.alert('Location ယူရန်ခွင့်ပြုချက်မရှိပါ');
-        } else {
-          console.log('တခုခု မှားယွင်းနေပါသည်');
         }
-        const data = await _requestLocation();
-        return data;
-      });
-    return response;
+      })
+      .catch(err => {
+        console.log(" Failed fetching route data by date from ems api!!!!", err)
+      })
   };
-
   /**
-   * phone call function.
-   * @param {*} phone
+   * Draw Route
    */
-   const phonecall = phone => {
-    Linking.openURL(`tel:${phone}`);
-  };
-
-  const renderContent = () => {
-    
-      console.log('Render content ');
-
-    return (
-      <View style={styles.contentContainer}>
-        <View
-          style={{
-            alignItems: 'center',
+  async function drawRoute(busStopData, color) {
+    let preAllRouteArr = allRouteArr;
+    if (busStopData) {
+      const waypoints = [];
+      for (let element of busStopData?.eveningData) {
+        if (element?.location) {
+          let coordinatesObj = {
+            coordinates: [
+              Number(element.location.lng),
+              Number(element.location.lat),
+            ],
+          };
+          waypoints.push(coordinatesObj);
+        }
+      }
+      const reqOptions = {
+        waypoints: waypoints,
+        profile: 'driving',
+        geometries: 'geojson',
+      };
+      const res = await directionsClient.getDirections(reqOptions).send();
+      let newRoute = makeLineString(res.body.routes[0].geometry.coordinates);
+      (newRoute.properties = {
+        color: color,
+      }),
+        preAllRouteArr.push(newRoute);
+      setRoute([...preAllRouteArr]);
+    }
+  }
+  /**
+   * Render Busstop List
+   */
+  const renderBusStopAnnotations = () => {
+    let features = [];
+    allBusStopArr?.map((item, index) => {
+      let feature = {
+        type: 'Feature',
+        id: `${index}`,
+        properties: {
+          id: `${index}`,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [Number(item.location.lng), Number(item.location.lat)],
+        },
+      };
+      features.push(feature);
+    });
+    const featureCollection = {
+      type: 'FeatureCollection',
+      features: features,
+    };
+    return allBusStopArr ? (
+      <>
+        <MapboxGL.ShapeSource
+          id="symbolLocationSource"
+          shape={featureCollection}
+          onPress={item => {
+            let id = item.features[0].id;
+            if (modalVisible == true) {
+              modalObject == allBusStopArr[0][id]
+                ? setModalVisible(false)
+                : setmodalObject(allBusStopArr[0][id]);
+            } else {
+              setmodalObject(allBusStopArr[0][id]);
+              setModalVisible(true);
+            }
           }}>
-          <Image
-            style={styles.img2}
-            source={require('../../assets/minus.png')}
-            accessibilityLabel="minus-sign"
+          <MapboxGL.SymbolLayer
+            id="userPoints"
+            aboveLayerID="routeFill"
+            style={{
+              iconImage: gps,
+              iconSize: 0.07,
+              iconPadding: 0,
+              iconAnchor: 'center',
+            }}
           />
-        </View>
-        {(
-          <View
-            style={{
-              marginBottom: 10,
-            }}></View>
-        )}
-        {(
-          <View
-            style={{
-              paddingLeft: 30,
-              paddingEnd: 60,
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                marginTop: 10,
-              }}>
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    marginVertical: 10,
-                    width: Dimensions.get('window').width / 1.5,
-                  }}>
-                  <Image
-                    style={styles.image}
-                    source={require('../../assets/car.png')}
-                  />
-                  <Text style={styles.paragraph}>{route?.params?.IMEIName}</Text>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    width: Dimensions.get('window').width / 1.5,
-                  }}>
-                  <Image
-                    style={styles.image3}
-                    source={require('../../assets/driver.png')}
-                  />
-                  <Text style={styles.paragraph}>
-                    {route?.params?.driverName}
-                    {'\n'}
-                    <Text style={styles.paragraph2}>
-                      {route?.params?.driverPhone}
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  padding: 10,
-                  backgroundColor: '#F2F1F0',
-                  borderRadius: 10,
-                  borderColor: '#C0C9CC',
-                  borderWidth: 1,
-                  height: 45,
-                  justifyContent: 'center',
-                  marginTop: 25,
-                }}>
-                <TouchableOpacity
-                  onPress={() => phonecall(route?.params?.driverPhone)}>
-                  <Image
-                    style={styles.img}
-                    source={require('../../assets/phone.png')}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
-      </View>
-    );
-  }; 
-  const renderModal = () => {
-    return modalVisible ? (  
-      <ButtonDrawer
-        roundedEdges={true}
-        containerHeight={hp('35%')}
-        shadow={true}
-        onExpanded={() => {
-          // setLocationview(true);
-        }}
-        onCollapsed={() => {
-          // setLocationview(false);
-        }}>
-        {renderContent()}
-        </ButtonDrawer>
+        </MapboxGL.ShapeSource>
+      </>
     ) : null;
   };
+  /**
+   * Render Route
+   */
+  const renderRoute = (routeArr, i) => {
+    return routeArr ? (
+      <MapboxGL.LineLayer
+        id="routeFill"
+        key={Math.random()}
+        style={{
+          lineJoin: 'round',
+          lineColor: ['get', 'color'],
+          lineWidth: 3,
+          lineCap: 'round',
+        }}
+      />
+    ) : null;
+  };
+
+  const renderActions = () => (
+    <View
+      style={{
+        position: 'absolute',
+        left: 10,
+        top: 10,
+        padding: 5,
+      }}>
+      <TouchableOpacity
+        style={{
+          ...CommonStyle.mapButton,
+        }}
+        onPress={() => {
+          stopPress()
+        }}>
+        <Image
+          source={require('../../assets/back.png')}
+          style={styles.image2}
+        />
+      </TouchableOpacity>
+    </View>
+  )
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.flex}>
-        <MapboxGL.MapView style={styles.map}
+
+        <MapboxGL.MapView
+          style={styles.flex}
           logoEnabled={false}
           compassEnabled={false}
           zoomEnabled={true}
@@ -418,45 +275,20 @@ const MapView = ({ navigation, route }) => {
               />
             </View>
           </MapboxGL.MarkerView>
-          <MapboxGL.UserLocation
-            animated={USER_SHOW_LOCATION}
-            style={styles.pointuser}
-            visible={USER_SHOW_LOCATION}
-            showsUserHeadingIndicator={USER_SHOW_LOCATION}
-            onUpdate={onUserLocationUpdate()}
-          />
+          {allBusStopArr?.length > 0 && (
+            <MapboxGL.ShapeSource
+              id="routeSource"
+              shape={{
+                type: 'FeatureCollection',
+                features: allRouteArr,
+              }}>
+
+              {allRouteArr?.map((data, index) => renderRoute(data, index))}
+            </MapboxGL.ShapeSource>
+          )}
+          {allBusStopArr?.length > 0 && renderBusStopAnnotations()}
         </MapboxGL.MapView>
-        {renderModal()}
-        <View
-          style={{
-            alignItems: 'flex-end',
-          }}>
-          <TouchableOpacity
-            style={{
-              ...CommonStyle.mapButton,
-              marginVertical: 10,
-            }}
-            onPress={() => {
-              handleStop()
-            }}>
-            <Text style={CommonStyle.buttonText}>Back</Text>
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            alignItems: 'center',
-          }}>
-          <TouchableOpacity
-            style={{
-              ...CommonStyle.mapButton,
-              marginVertical: -60,
-            }}
-            onPress={() => {
-              centeringButtonPress()
-            }}>
-            <Text style={CommonStyle.buttonText}>Zoom</Text>
-          </TouchableOpacity>
-        </View>
+        {renderActions()}
       </View>
     </SafeAreaView>
   );
@@ -467,12 +299,6 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-  },
-  page: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF'
   },
   map: {
     flex: 1
@@ -492,57 +318,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.35,
     alignItems: 'center',
   },
-  img3: {
+  image2: {
     width: 30,
     height: 30,
   },
-  pointuser: {
-    position: 'absolute',
-    right: 10,
-    bottom: 5,
-  },
-  nav: {
-    position: 'absolute',
-    right: 10,
-    top: 20,
-    padding: 15,
-  },
-
-  loader: {
-    position: 'absolute',
-    backgroundColor: 'rgba(0,0,0, .5)',
-    height: '100%',
-    width: '100%',
-    zIndex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pointuser: {
-    position: 'absolute',
-    right: 10,
-    bottom: 5,
-  },
-  circle: {
-    width: 32,
-    height: 32,
-    borderRadius: 17,
-    backgroundColor: 'rgba(68, 154, 235, .4)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  innerCircle: {
-    width: 20,
-    height: 20,
-    borderRadius: 11,
-    backgroundColor: '#1D1D1D',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dotCircle: {
-    width: 12,
-    height: 12,
-    borderRadius: 7,
-    backgroundColor: 'rgba(68, 154, 235, 1)',
+  img3: {
+    width: 30,
+    height: 30,
   },
   img: {
     width: 25,
@@ -556,18 +338,6 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
-  centeringButton: {
-    backgroundColor: '#98D7C2',
-    borderRadius: 20,
-    padding: 7,
-    margin: 10,
-    shadowColor: '#303838',
-    shadowOffset: {width: 0, height: 5},
-    shadowRadius: 10,
-    shadowOpacity: 0.35,
-    alignItems: 'center',
-  },
-
   image: {
     width: 35,
     height: 35,
@@ -595,33 +365,6 @@ const styles = StyleSheet.create({
     width: 130,
     fontFamily: 'SourceSerif4-Regular',
     letterSpacing: 0.1,
-  },
-  noti: {
-    flex: 0,
-    fontSize: 22,
-    color: '#4E4F50',
-    borderColor: '#d7d0d0',
-    textAlign: 'center',
-    fontFamily: 'SourceSerif4-Regular',
-  },
-  vibrateStopBtn: {
-    backgroundColor: '#0f7e81',
-    borderRadius: 10,
-    borderColor: '#C0C9CC',
-    borderWidth: 1,
-    height: 45,
-    justifyContent: 'center',
-    width: 150,
-  },
-  vibrateStopDisabledBtn: {
-    backgroundColor: '#0f7e81',
-    borderRadius: 10,
-    borderColor: '#C0C9CC',
-    borderWidth: 1,
-    height: 45,
-    justifyContent: 'center',
-    width: 150,
-    opacity: 0.5,
   },
   buttonText: {
     fontSize: 15,

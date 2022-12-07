@@ -10,14 +10,14 @@ import {
 import { Provider } from 'react-native-paper';
 import DropDown from '../components/DropDown';
 import { AuthContext } from '../context/AuthContext';
-import { CommonStyle } from "./common.style";
+import { CommonStyle } from "./Common.style";
 
 let loginMsg = 'Login id is required.';
 let companyNameMsg = 'Company name is required.';
 let codeMsg = 'Password is required.';
 let codeMatchMsg = 'Login ID or Password is not correct.';
 let company = [{ id: 1, name: 'SCM' }, { id: 2, name: 'CGM' }]
-const UserLoginScreen = ({navigation}) => {
+const UserLoginScreen = ({ navigation }) => {
   const [loginId, setloginId] = useState(null);
   const [loginIDErr, setloginIdErr] = useState(false);
   const [password, setPassword] = useState(null);
@@ -35,8 +35,7 @@ const UserLoginScreen = ({navigation}) => {
   }
 
   const onLoginUser = () => {
-    var response = login(loginId, password, companyName?.name);
-    return response;
+    return login(loginId, password, companyName?.name);
   };
 
   let onSubmitUser = async () => {
@@ -59,7 +58,7 @@ const UserLoginScreen = ({navigation}) => {
     navigation.navigate('DriverLogin', {
       driverLoginStatus: 'true'
     });
-}    
+  }
   return (
     <Provider>
       <View style={CommonStyle.container}>

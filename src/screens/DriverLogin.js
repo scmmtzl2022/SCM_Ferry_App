@@ -12,7 +12,8 @@ import {
 import { AuthContext } from "../context/AuthContext";
 import { Provider } from 'react-native-paper';
 import DropDown from '../components/DropDown';
-import { BASE_URL } from '../config';
+import { BASE_URL } from '../Config';
+import axios from 'axios';
 
 const Separator = () => <View style={styles.separator} />;
 let nameMsg = 'Name is required.';
@@ -34,15 +35,16 @@ const DriverLogin = ({ navigation, route }) => {
     setDriverItem(item.id);
     setSelectedItem(item);
   }
-  async function fetchMyAPI() {
-    fetch(`${BASE_URL}/drivers`)
+  async function getDriverList() {
+    axios
+      .get(`${BASE_URL}/drivers`)
       .then(response => {
-        return response.json();
+        return response;
       })
       .then(response => {
-        setoriginalList(response.driverList);
+        setoriginalList(response.data.driverList);
         const list = [];
-        response.driverList.map(dist => {
+        response.data.driverList.map(dist => {
           list.push({
             id: dist.id,
             name: dist.name,
@@ -55,24 +57,23 @@ const DriverLogin = ({ navigation, route }) => {
       });
   }
   useEffect(() => {
-    fetchMyAPI();
+    getDriverList();
     let isMounted = false;
     if (isMounted) {
-      fetchMyAPI = () => undefined;
+      getDriverList = () => undefined;
     }
     return () => {
-      DeviceEventEmitter.emit('your listener', {});
-      fetchMyAPI = () => {
+      DeviceEventEmitter.emit(`your listener`, {});
+      getDriverList = () => {
         {
         }
       };
     };
   }, []);
-  console.log( "selectedItem ", selectedItem)
+
   const onLogin = async () => {
-    const selectedDriver = originalList.filter(item => item.id === driverItem);
-    var response = await driverLogin(selectedDriver[0].id, code);
-    return response;
+    const selectedDriver = originalList.find(item => item.id === driverItem);
+    return await driverLogin(selectedDriver.id, code);
   };
 
   const onSubmit = async () => {
@@ -81,18 +82,14 @@ const DriverLogin = ({ navigation, route }) => {
 
     if (driverItem && code) {
       const res = await onLogin();
-      if (res) {
-        setcodeNotEqualErr(false);
-      } else {
-        setcodeNotEqualErr(true);
-      }
+      res ? setcodeNotEqualErr(false) : setcodeNotEqualErr(true);
     }
   };
   /**
    * Navigation to LoginScreen
    */
   const goToUserLogin = () => {
-    navigation.navigate('UserLogin');
+    navigation.navigate(`UserLogin`);
   }
 
   return (
@@ -160,27 +157,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#edfaf6',
   },
-  dropdown: {
-    backgroundColor: 'white',
-    borderBottomColor: 'gray',
-    borderBottomWidth: 0.5,
-    padding: 5,
-  },
-  shadow: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-  },
-  icon: {
-    marginRight: 5,
-    width: 18,
-    height: 18,
-  },
   separator: {
     marginVertical: 10,
   },
@@ -208,13 +184,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: Dimensions.get('window').width / 2.2,
     backgroundColor: '#00c292',
-    borderRadius: 6,
+    borderRadius: 4,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
     shadowRadius: 4,
     elevation: 10,
-    borderRadius: 15,
     height: 50,
     marginTop: 10,
   },

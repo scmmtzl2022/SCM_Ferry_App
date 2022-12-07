@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from "react-native";
-import Navigation from "./src/navigations/auth-navigator";
+import Navigation from "./src/navigations/AuthNavigator";
 import { AuthProvider } from "./src/context/AuthContext";
 
 const App = () => {

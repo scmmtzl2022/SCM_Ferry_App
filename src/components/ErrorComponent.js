@@ -1,7 +1,7 @@
 import React from 'react';
-import {StyleSheet, Text, View, Image} from 'react-native';
+import { StyleSheet, Text, View, Image } from 'react-native';
 
-const ErrorComponent = ({errormsg}) => {
+const ErrorComponent = ({ errormsg }) => {
   return (
     <View style={styles.container}>
       <Image style={styles.img} source={require('../../assets/waiting.png')} />

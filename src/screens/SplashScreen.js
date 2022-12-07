@@ -4,7 +4,7 @@ import { ActivityIndicator, View, StyleSheet } from "react-native";
 const SplashScreen = () => {
   return (
     <View style={SplashScreenStyle.mainWrapper}>
-      <ActivityIndicator size="large" color="#5899D1" />
+      <ActivityIndicator size="large" color="#034c0" />
     </View>
   );
 };
