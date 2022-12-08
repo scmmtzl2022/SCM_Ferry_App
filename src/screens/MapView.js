@@ -57,10 +57,7 @@ const MapView = ({ navigation, route }) => {
    */
   const centeringButtonPress = () => {
     _camera !== undefined &&
-      _camera?.flyTo(
-        carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194],
-        1000,
-      );
+      _camera?.flyTo(carLocation, 1000);
   };
   useEffect(() => {
     getLocation();
@@ -164,24 +161,13 @@ const MapView = ({ navigation, route }) => {
       <>
         <MapboxGL.ShapeSource
           id="symbolLocationSource"
-          shape={featureCollection}
-          onPress={item => {
-            let id = item.features[0].id;
-            if (modalVisible == true) {
-              modalObject == allBusStopArr[0][id]
-                ? setModalVisible(false)
-                : setmodalObject(allBusStopArr[0][id]);
-            } else {
-              setmodalObject(allBusStopArr[0][id]);
-              setModalVisible(true);
-            }
-          }}>
+          shape={featureCollection}>
           <MapboxGL.SymbolLayer
             id="userPoints"
             aboveLayerID="routeFill"
             style={{
               iconImage: gps,
-              iconSize: 0.07,
+              iconSize: 0.5,
               iconPadding: 0,
               iconAnchor: 'center',
             }}
@@ -247,13 +233,10 @@ const MapView = ({ navigation, route }) => {
             zoomLevel={14}
             animationMode="flyTo"
             animationDuration={1500}
-            centerCoordinate={
-              carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194]
-            }
+            centerCoordinate={carLocation}
             followUserLocation={false}
             defaultSettings={{
-              centerCoordinate:
-                carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194],
+              centerCoordinate: carLocation,
               followUserLocation: true,
               followUserMode: MapboxGL.UserTrackingModes.Follow,
             }}
@@ -264,9 +247,7 @@ const MapView = ({ navigation, route }) => {
             title="This is a title"
             description="This is a description"
             key={Math.random()}
-            coordinate={
-              carLocation?.length > 0 ? carLocation : [96.14965243954374, 16.798741608382194]
-            }>
+            coordinate={carLocation}>
             <View>
               <Image
                 testID="car-location{renderModal()}"
@@ -275,7 +256,8 @@ const MapView = ({ navigation, route }) => {
               />
             </View>
           </MapboxGL.MarkerView>
-          {allBusStopArr?.length > 0 && (
+          {allBusStopArr?.length > 0 && renderBusStopAnnotations()}
+          {allBusStopArr?.length > 0 && (      
             <MapboxGL.ShapeSource
               id="routeSource"
               shape={{
@@ -285,8 +267,7 @@ const MapView = ({ navigation, route }) => {
 
               {allRouteArr?.map((data, index) => renderRoute(data, index))}
             </MapboxGL.ShapeSource>
-          )}
-          {allBusStopArr?.length > 0 && renderBusStopAnnotations()}
+          )}          
         </MapboxGL.MapView>
         {renderActions()}
       </View>

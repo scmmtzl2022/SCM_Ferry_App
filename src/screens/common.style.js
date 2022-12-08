@@ -3,12 +3,15 @@ import { StyleSheet, Dimensions } from "react-native";
 const CommonStyle = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#edfaf6',
     paddingTop: '10%',
     paddingBottom: '30%',
     height: '100%',
+  },
+  safeContainerStyle: {
+    margin: 30,
+    justifyContent: 'center',
   },
   wrapper: {
     width: '80%',
@@ -23,17 +26,14 @@ const CommonStyle = StyleSheet.create({
   },
   textboxInput: {
     backgroundColor: 'white',
-    borderBottomColor: 'gray',
-    borderBottomWidth: 0.5,
     borderRadius: 6,
     fontSize: 14,
-    marginLeft: 0,
-    height: 44,
+    paddingLeft: 10,
+    height: 50,
   },
   input: {
     backgroundColor: 'white',
     borderBottomColor: 'gray',
-    borderBottomWidth: 0.5,
     borderRadius: 6,
     fontSize: 14,
     height: 50,
@@ -46,8 +46,8 @@ const CommonStyle = StyleSheet.create({
   },
   errtxt: {
     color: 'red',
-    padding: 0,
-    margin: 0,
+    padding: 10,
+    marginBottom: 5,
     marginVertical: 0,
     paddingVertical: 0,
     fontSize: 14,
@@ -56,7 +56,7 @@ const CommonStyle = StyleSheet.create({
     fontSize: 30,
     textAlign: 'center',
     padding: 0,
-    color: '#00c292',
+    color: '#167D7F',
     borderRadius: 6,
     borderColor: '#ff623c',
     fontFamily: 'SourceSerif4-Regular',
@@ -67,8 +67,8 @@ const CommonStyle = StyleSheet.create({
   button02: {
     justifyContent: 'center',
     width: Dimensions.get('window').width / 2.2,
-    backgroundColor: '#00c292',
-    borderRadius: 6,
+    backgroundColor: '#167D7F',
+    borderRadius: 12,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
@@ -83,7 +83,7 @@ const CommonStyle = StyleSheet.create({
     padding: 7,
     margin: 10,
     shadowColor: '#303838',
-    shadowOffset: {width: 0, height: 5},
+    shadowOffset: { width: 0, height: 5 },
     shadowRadius: 10,
     shadowOpacity: 0.35,
   },
@@ -130,7 +130,7 @@ const CommonStyle = StyleSheet.create({
     marginVertical: 10,
   },
   link: {
-    color: 'blue',
+    color: '#167D7F',
   },
 });
 
