@@ -7,12 +7,15 @@ import DriverLogin from "../screens/DriverLogin";
 import SplashScreen from "../screens/SplashScreen";
 import MapView from "../screens/MapView";
 import ListView from "../screens/ListView";
+import Offlinealert from "../screens/OfflineAlert";
 
 const Stack = createNativeStackNavigator();
 
 const Navigation = ({ }) => {
   const { userInfo, splashLoading } = useContext(AuthContext);
   return (
+    <>
+    <Offlinealert/>
     <NavigationContainer>
       <Stack.Navigator>
         {splashLoading ? (
@@ -33,6 +36,11 @@ const Navigation = ({ }) => {
               component={MapView}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              name="=OfflineMap"
+              component={Offlinealert}
+              options={{ headerShown: false}}
+            />
           </>
 
         ) : (
@@ -52,6 +60,7 @@ const Navigation = ({ }) => {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    </>
   );
 }
 
