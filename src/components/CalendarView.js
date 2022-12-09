@@ -28,7 +28,7 @@ const CalendarView = ({ selectDate }) => {
       dateNumberStyle: styles.dateNumberStyle,
     });
   }
-
+  console.warn = () => { };
   return (
     <View>
       <CalendarStrip
@@ -60,9 +60,9 @@ const CalendarView = ({ selectDate }) => {
   );
 }
 const styles = StyleSheet.create({
-  headerTextStyle:{
-    color: 'white', 
-    fontSize: 18, 
+  headerTextStyle: {
+    color: 'white',
+    fontSize: 18,
     fontWeight: 'bold'
   },
   dateNumberStyle: {
